@@ -369,10 +369,19 @@ st.markdown(f"""
 </div>
 
 <script>
+function pad(n) {{ return String(n).padStart(2,'0'); }}
+
 function tick() {{
   const now = new Date();
-  const t = now.toLocaleTimeString('en-GB', {{hour12: false}});
-  const d = now.toLocaleDateString('en-GB', {{weekday:'short',day:'2-digit',month:'short',year:'numeric'}}).toUpperCase();
+  const h = pad(now.getHours());
+  const m = pad(now.getMinutes());
+  const s = pad(now.getSeconds());
+  const t = h + ':' + m + ':' + s;
+
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const d = days[now.getDay()] + ' ' + pad(now.getDate()) + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+
   const clk = document.getElementById('clock');
   const dl  = document.getElementById('dateline');
   const fs  = document.getElementById('footer-sync');
@@ -380,6 +389,7 @@ function tick() {{
   if (dl)  dl.textContent  = d;
   if (fs)  fs.textContent  = 'LAST SYNC: ' + t;
 }}
+
 tick();
 setInterval(tick, 1000);
 </script>
