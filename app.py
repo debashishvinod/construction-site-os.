@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import streamlit.components.v1 as components
 from streamlit_autorefresh import st_autorefresh
 
 st.set_page_config(
@@ -8,6 +9,33 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# Hide ALL streamlit chrome so the iframe fills the page
+st.markdown("""
+<style>
+#MainMenu,footer,header,.stDeployButton,
+[data-testid="stToolbar"],[data-testid="stDecoration"],
+[data-testid="stStatusWidget"]{display:none!important}
+.block-container{padding:0!important;margin:0!important;max-width:100%!important}
+section[data-testid="stSidebar"]{display:none!important}
+html,body,[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+[data-testid="stVerticalBlock"]{
+  padding:0!important;margin:0!important;
+  background:#030508!important;
+}
+/* Make the component iframe fill entire viewport */
+iframe{
+  width:100vw!important;
+  height:100vh!important;
+  border:none!important;
+  display:block!important;
+  position:fixed!important;
+  top:0!important;left:0!important;
+  z-index:9999!important;
+}
+</style>
+""", unsafe_allow_html=True)
 
 st_autorefresh(interval=5000, limit=None, key="site_refresh")
 
@@ -167,15 +195,11 @@ sensor_pills = "".join(
     for i, s in enumerate(["PPE CAM", "DUST SENSOR", "CRANE LOAD", "THERMAL", "ZONE DETECT"])
 )
 
-# ── RENDER ────────────────────────────────────────────────────────────────────
-# Everything in ONE st.components.html call so JS runs in the same document
-import streamlit.components.v1 as components
-
-components.html(f"""
-<!DOCTYPE html>
+components.html(f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@200;300;400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
@@ -188,7 +212,7 @@ components.html(f"""
 }}
 html,body{{
   background:var(--bg);color:#fff;font-family:var(--body);
-  margin:0;padding:0;min-height:100vh;overflow-x:hidden;
+  width:100%;height:100%;min-height:100vh;overflow-x:hidden;
 }}
 .bg-scanlines{{position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.18) 2px,rgba(0,0,0,0.18) 4px);}}
@@ -205,16 +229,25 @@ html,body{{
   background:linear-gradient(90deg,transparent,rgba(255,149,0,0.3));
   transform-origin:left center;animation:radar-spin 5s linear infinite;}}
 @keyframes radar-spin{{to{{transform:rotate(360deg)}}}}
-.dashboard{{position:relative;z-index:2;padding:22px;max-width:1120px;margin:0 auto;}}
-.header{{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;margin-bottom:24px;gap:16px;}}
+
+.dashboard{{
+  position:relative;z-index:2;
+  padding:24px 32px;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}}
+
+.header{{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;
+  margin-bottom:20px;gap:16px;}}
 .sys-tag{{font-family:var(--mono);font-size:9px;color:var(--amber);letter-spacing:0.22em;
   text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:6px;}}
 .sys-tag::before{{content:'';width:16px;height:1px;background:var(--amber);opacity:0.6;}}
-.site-title{{font-family:var(--head);font-size:30px;font-weight:900;letter-spacing:0.06em;
+.site-title{{font-family:var(--head);font-size:clamp(22px,3vw,36px);font-weight:900;letter-spacing:0.06em;
   background:linear-gradient(135deg,#fff 30%,var(--amber) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;}}
 .site-sub{{font-size:11px;font-weight:200;color:rgba(255,255,255,0.35);
   letter-spacing:0.12em;text-transform:uppercase;margin-top:6px;}}
+.header-center{{text-align:center;display:flex;align-items:center;justify-content:center;}}
 .holo-badge{{display:inline-block;position:relative;padding:14px 20px;
   border:1px solid var(--border2);border-radius:6px;
   background:rgba(255,149,0,0.04);min-width:160px;text-align:center;}}
@@ -228,7 +261,7 @@ html,body{{
 .holo-sub{{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.3);
   margin-top:4px;letter-spacing:0.1em;}}
 .header-right{{text-align:right;}}
-.clock-block{{font-family:var(--mono);font-size:26px;color:var(--amber);
+.clock-block{{font-family:var(--mono);font-size:clamp(20px,2.5vw,30px);color:var(--amber);
   letter-spacing:0.08em;text-shadow:0 0 20px rgba(255,149,0,0.4);}}
 .date-block{{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.28);
   letter-spacing:0.1em;margin-top:4px;text-transform:uppercase;}}
@@ -236,23 +269,32 @@ html,body{{
 .rc-label{{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.08em;}}
 .rc-bar{{width:90px;height:2px;background:rgba(255,149,0,0.12);border-radius:1px;overflow:hidden;}}
 .rc-fill{{height:100%;background:linear-gradient(90deg,var(--amber2),var(--amber));border-radius:1px;width:100%;}}
+
 .divider{{height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);
-  opacity:0.25;margin-bottom:22px;position:relative;}}
+  opacity:0.25;margin-bottom:18px;position:relative;}}
 .divider::after{{content:'';position:absolute;top:-2px;left:50%;transform:translateX(-50%);
   width:6px;height:6px;background:var(--amber);border-radius:50%;box-shadow:0 0 12px var(--amber);}}
+
 .status-bar{{display:flex;align-items:center;justify-content:space-between;
   background:var(--bg2);border:1px solid var(--border);border-radius:6px;
-  padding:10px 18px;margin-bottom:16px;}}
+  padding:10px 18px;margin-bottom:14px;}}
 .status-left{{display:flex;align-items:center;gap:12px;}}
 .status-dot{{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}}
 .status-txt{{font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:0.1em;}}
-.status-right{{display:flex;align-items:center;gap:20px;}}
+.status-right{{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}}
 .sensor-pill{{display:flex;align-items:center;gap:5px;font-family:var(--mono);
   font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.08em;}}
 .sensor-pip{{width:4px;height:4px;border-radius:50%;background:var(--green);
   display:inline-block;animation:pulse-dot 2.5s ease-in-out infinite;}}
 @keyframes pulse-dot{{0%,100%{{opacity:1;transform:scale(1)}}50%{{opacity:0.3;transform:scale(0.6)}}}}
-.metrics-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}}
+
+.metrics-grid{{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-bottom:14px;
+  flex:1;
+}}
 .metric-card{{position:relative;background:var(--bg2);border:1px solid var(--border);
   border-radius:6px;padding:20px;overflow:hidden;transition:border-color 0.5s,box-shadow 0.5s;}}
 .metric-card:hover{{border-color:var(--border2);
@@ -272,7 +314,7 @@ html,body{{
   display:flex;align-items:center;gap:6px;}}
 .label-dot{{width:4px;height:4px;border-radius:50%;box-shadow:0 0 6px currentColor;
   display:inline-block;animation:pulse-dot 2s ease-in-out infinite;}}
-.card-value{{font-family:var(--head);font-size:40px;font-weight:900;line-height:1;letter-spacing:0.02em;}}
+.card-value{{font-family:var(--head);font-size:clamp(28px,3.5vw,44px);font-weight:900;line-height:1;letter-spacing:0.02em;}}
 .card-unit{{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,0.35);margin-left:4px;}}
 .bar-track{{height:2px;background:rgba(255,255,255,0.05);border-radius:1px;margin-top:14px;overflow:hidden;}}
 .bar-fill{{height:100%;border-radius:1px;position:relative;}}
@@ -292,21 +334,21 @@ html,body{{
   0%,100%{{box-shadow:0 0 20px rgba(255,45,45,0.4)}}
   50%{{box-shadow:0 0 40px rgba(255,45,45,0.7),0 0 0 4px rgba(255,45,45,0.1)}}}}
 .alerts-panel{{border-radius:6px;border:1px solid rgba(255,45,45,0.25);
-  background:#0c0606;overflow:hidden;margin-bottom:16px;}}
+  background:#0c0606;overflow:hidden;margin-bottom:14px;}}
 .alerts-top{{padding:12px 18px;background:rgba(255,45,45,0.07);
   border-bottom:1px solid rgba(255,45,45,0.15);display:flex;align-items:center;gap:10px;}}
 .alerts-heading{{font-family:var(--head);font-size:11px;font-weight:700;
   letter-spacing:0.14em;text-transform:uppercase;color:var(--red);flex:1;}}
 .alerts-badge{{background:var(--red);color:#fff;font-family:var(--mono);
   font-size:9px;padding:3px 7px;border-radius:2px;letter-spacing:0.05em;}}
-.alert-row{{display:flex;align-items:center;gap:12px;padding:11px 18px;
+.alert-row{{display:flex;align-items:center;gap:12px;padding:10px 18px;
   border-bottom:1px solid rgba(255,255,255,0.03);}}
 .alert-row:last-child{{border-bottom:none;}}
 .alert-pip{{width:5px;height:5px;border-radius:50%;background:var(--red);
   display:inline-block;flex-shrink:0;animation:pulse-dot 0.8s ease-in-out infinite;}}
 .alert-msg{{font-size:12px;font-weight:300;color:rgba(255,180,180,0.8);letter-spacing:0.03em;}}
 .footer{{display:flex;align-items:center;justify-content:space-between;
-  padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);}}
+  padding-top:12px;border-top:1px solid rgba(255,255,255,0.05);margin-top:auto;}}
 .footer-sys{{font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.18);letter-spacing:0.1em;}}
 .footer-sync{{font-family:var(--mono);font-size:9px;color:rgba(255,149,0,0.4);letter-spacing:0.08em;}}
 </style>
@@ -368,31 +410,26 @@ html,body{{
 var REFRESH_MS = 5000;
 var startTs    = Date.now();
 
-function pad(n) {{ return String(n).padStart(2, '0'); }}
+function pad(n) {{ return String(n).padStart(2,'0'); }}
 
 function tick() {{
-  var now   = new Date();
-  var h     = pad(now.getHours());
-  var m     = pad(now.getMinutes());
-  var s     = pad(now.getSeconds());
-  var time  = h + ':' + m + ':' + s;
-
+  var now    = new Date();
+  var time   = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
   var days   = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
   var months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  var date   = days[now.getDay()] + ' ' + pad(now.getDate()) + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  var date   = days[now.getDay()]+' '+pad(now.getDate())+' '+months[now.getMonth()]+' '+now.getFullYear();
 
   document.getElementById('clk').textContent  = time;
   document.getElementById('dt').textContent   = date;
-  document.getElementById('sync').textContent = 'LAST SYNC: ' + time;
+  document.getElementById('sync').textContent = 'LAST SYNC: '+time;
 
   var elapsed   = (Date.now() - startTs) % REFRESH_MS;
   var remaining = 1 - elapsed / REFRESH_MS;
-  document.getElementById('bar').style.width  = (remaining * 100).toFixed(2) + '%';
+  document.getElementById('bar').style.width = (remaining*100).toFixed(2)+'%';
 }}
 
 tick();
 setInterval(tick, 100);
 </script>
 </body>
-</html>
-""", height=900, scrolling=True)
+</html>""", height=0, scrolling=False)
