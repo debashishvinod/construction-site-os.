@@ -183,7 +183,7 @@ if alerts:
     )
     alerts_html = (
         '<div class="alerts-panel">'
-        + f'<div class="alerts-top"><span class="alerts-heading">&#x2B21; Active Safety Alerts</span>'
+        + f'<div class="alerts-top"><span class="alerts-heading">&#x2B21; {len(alerts)} Active Safety Alert{"s" if len(alerts)!=1 else ""}</span>'
         + f'<span class="alerts-badge">{len(alerts)}</span></div>'
         + rows + '</div>'
     )
